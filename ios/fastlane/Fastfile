@@ -16,16 +16,37 @@
 default_platform(:ios)
 
 platform :ios do
+  before_all do
+    setup_circle_ci
+  end
+
   desc "Runs all the tests"
   lane :tests do
-    run_tests(project: "mobile_rncircletest3_3611.xcodeproj", scheme: "mobile_rncircletest3_3611")
+    run_tests(project: "rncircletest3_3611.xcodeproj", scheme: "rncircletest3_3611")
   end
 
   desc "Push a new beta build to TestFlight"
   lane :beta do
-    increment_build_number(xcodeproj: "mobile_rncircletest3_3611.xcodeproj")
+    produce(
+      username: "support@crowdbotics.com",
+      app_identifier: "com.crowdbotics.rncircletest3-3611",
+      app_name: "rncircletest3-3611",
+      team_name: "Crowdbotics Corporation",
+      itc_team_name: "Crowdbotics Corporation"
+    )
+    increment_build_number(xcodeproj: "rncircletest3_3611.xcodeproj")
+    update_app_identifier(
+      xcodeproj: "rncircletest3_3611.xcodeproj",
+      plist_path: "rncircletest3_3611/Info.plist",
+      app_identifier: "com.crowdbotics.rncircletest3-3611"
+    )
+    update_project_team(path: "rncircletest3_3611.xcodeproj", teamid: "6YKR59QXKM")
     match(type: "appstore", readonly: is_ci)
-    build_app(scheme: "mobile_rncircletest3_3611")
+    build_app(
+      scheme: "rncircletest3_3611",
+      export_method: "app-store",
+      xcargs: "-allowProvisioningUpdates"
+    )
     upload_to_testflight
   end
 end
